@@ -2,52 +2,39 @@
 Adrian Martushev's Flask API.
 """
 
+
+from flask import Flask, send_from_directory
 import os
-from flask import Flask, render_template
+import configparser
 
 app = Flask(__name__)
 
-
-def file_exists(filename):
-    file_path = os.path.join("web/templates", filename)
-    return os.path.isfile(file_path)
-
-# Function to serve files or return an error page
-def serve_file_or_error(filename, error_page):
-    if '..' in filename or '~' in filename:
-        # Handle illegal characters in the filename
-        return "File is forbidden!", 403
-
-    if file_exists(filename):
-        # Serve the requested file
-        return render_template(filename)
-    else:
-        # Serve the appropriate error page
-        return render_template(error_page)
-        
-        
 @app.route("/")
 def hello():
-    return "UOCIS docker demo!\n"
-    
-    
-@app.route("/404.html")
-def pageNotFound():
-    return render_template('404.html')
-
-@app.route("/403.html")
-def pageError():
-    return render_template('403.html')
+   return "UOCIS docker demo!\n"
 
 
-@app.route("/trivia.html")
-def trivia():
-    return render_template('trivia.html')
-    
-    
-   
-        
 
-if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+@app.route('/<path:filename>')
+def serve_file(filename):
+    if ".." in filename or "~" in filename:
+        return send_from_directory('pages', '403.html'), 403
+    if os.path.exists(f'pages/{filename}'):
+        return send_from_directory('pages', filename), 200
+    else:
+        return send_from_directory('pages', '404.html'), 404
+
+if __name__ == '__main__':
+    config = configparser.ConfigParser()
+    if os.path.exists('credentials.ini'):
+        config.read('credentials.ini')
+    else:
+        config.read('default.ini')
+
+    port = int(config.get('SERVER', 'PORT'))
+    debug_mode = config.getboolean('SERVER', 'DEBUG')
+
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+
+
 
