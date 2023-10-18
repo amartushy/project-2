@@ -2,7 +2,6 @@
 Adrian Martushev's Flask API.
 """
 
-
 from flask import Flask, send_from_directory
 import os
 import configparser
@@ -12,7 +11,6 @@ app = Flask(__name__)
 @app.route("/")
 def hello():
    return "UOCIS docker demo!\n"
-
 
 
 @app.route('/<path:filename>')
@@ -33,6 +31,7 @@ if __name__ == '__main__':
 
     port = int(config.get('SERVER', 'PORT'))
     debug_mode = config.getboolean('SERVER', 'DEBUG')
+
 
     app.run(host='0.0.0.0', port=port, debug=debug_mode)
 
